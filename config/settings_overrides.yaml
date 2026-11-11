@@ -1,0 +1,11 @@
+# Saved settings (merged over settings.yaml); every change is in outputs/private/decision_log.csv
+settings:
+  rating:
+    value_blend:
+      wpa: 0.25
+      rae: 0.75
+  expected:
+    context:
+      era: true
+      bowl_kind: true
+      opposition_strength: false

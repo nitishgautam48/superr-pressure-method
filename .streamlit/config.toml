@@ -1,0 +1,47 @@
+# RR Pressure Index dashboard - theme tokens (dark default, light available in Settings).
+# Dark is the default; both palettes are native so every widget (incl. tables) renders correctly.
+# Users switch theme from the app menu (Settings -> Theme); custom HTML and charts follow it.
+[server]
+headless = true
+address = "localhost"      # only this computer can open the dashboard (no LAN / internet access)
+runOnSave = false
+
+[browser]
+gatherUsageStats = false
+
+[client]
+toolbarMode = "viewer"          # hides developer options, keeps Settings (theme switch)
+showErrorDetails = "none"       # never leak tracebacks / data in error boxes
+
+[theme]
+base = "dark"
+primaryColor = "#E5307A"
+font = "Inter, system-ui, -apple-system, 'Segoe UI', sans-serif"
+codeFont = "'JetBrains Mono', ui-monospace, monospace"
+baseRadius = "8px"
+baseFontSize = 14
+showSidebarBorder = true
+
+[theme.dark]
+primaryColor = "#E5307A"
+backgroundColor = "#0E1117"
+secondaryBackgroundColor = "#161B26"
+textColor = "#E8EAF0"
+borderColor = "#2A3242"
+linkColor = "#8FA8EE"
+
+[theme.dark.sidebar]
+backgroundColor = "#161B26"
+secondaryBackgroundColor = "#1E2533"
+
+[theme.light]
+primaryColor = "#C81E64"
+backgroundColor = "#F7F7FA"
+secondaryBackgroundColor = "#FFFFFF"
+textColor = "#151923"
+borderColor = "#E3E5EC"
+linkColor = "#254AA5"
+
+[theme.light.sidebar]
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F0F1F5"

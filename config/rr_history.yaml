@@ -1,0 +1,5 @@
+# RR context for the "how each pick strengthens RR" angle.
+# Fill in from your research doc. The pipeline adds RR's own pressure numbers from the data (rr_lens.json);
+# it never writes prose - you write the "why RR" yourself.
+seasons: {}            # e.g. 2025: {finish: 9, note: "your note"}
+weaknesses: []         # e.g. ["death bowling in defences", "middle-overs batting vs spin"]

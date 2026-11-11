@@ -1,0 +1,16 @@
+# CI never sees the data pack: it checks that nothing confidential is tracked and runs the unit tests
+# (tests that need the real data skip automatically). Keep this repository PRIVATE.
+name: ci
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.13"}
+      - run: python scripts/check_repo_safety.py
+      - run: pip install -r requirements-dev.txt
+      - run: python -m pytest
