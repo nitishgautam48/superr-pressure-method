@@ -3,7 +3,7 @@
 # Users switch theme from the app menu (Settings -> Theme); custom HTML and charts follow it.
 [server]
 headless = true
-address = "localhost"      # only this computer can open the dashboard (no LAN / internet access)
+(no LAN / internet access)
 runOnSave = false
 
 [browser]
