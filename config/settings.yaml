@@ -116,6 +116,24 @@ reliability:
   subset_eligibility_factor: 0.5   # split-half / IPL-only / T20I-only use half the eligibility minimums
   dependence_rank_gap: 15      # flag a player whose IPL-only and T20I-only ranks differ by more than this
 
+rr_target:                     # the brief: reliable players under pressure whom RR should back at the IPL 2027 auction
+  use_for_final: true          # the submission model list = RR auction targets (the pure pressure ranking is kept too)
+  funnel:
+    min_pressure_balls: 180    # reliability gate (evidence: doubles batter repeatability vs 120)
+    min_pressure_units: 15     # innings (batters) / matches (bowlers) with pressure balls
+    active_from: 2025          # played in 2025 or later
+    recent_from: 2025
+    recent_pressure_balls: 40  # current-form sample since recent_from
+    require_level: true        # IPL or full-member T20I experience (not associate / A-team only)
+    exclude_current_rr: true   # RR's latest IPL squad = retain candidates, not auction targets
+  need_seasons_from: 2025      # RR's needs are measured on these seasons (rank among the 10 IPL teams, under pressure)
+  fit_shrink_balls: 60         # phase performance shrunk toward 0 with 60 pseudo-balls
+  alignment:                   # hard gate: a target must help where RR actually needs it
+    min_need_weight: 0.40      # a "need" phase = RR in the bottom ~60% of IPL teams there (need weight >= 0.4)
+    min_phase_balls: 40        # pressure balls in that phase
+  fit_weight: 0.30             # target score = 0.70 x pressure rating + 0.30 x RR fit (both 0-100 within the pool)
+  availability_file: config/auction_pool.yaml
+
 analyst:
   min_reason_chars: 10
 

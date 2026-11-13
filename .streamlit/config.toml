@@ -3,7 +3,6 @@
 # Users switch theme from the app menu (Settings -> Theme); custom HTML and charts follow it.
 [server]
 headless = true
-(no LAN / internet access)
 runOnSave = false
 
 [browser]

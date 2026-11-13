@@ -9,7 +9,7 @@ from tests.conftest import needs_data
 HOME = str(Path(__file__).resolve().parents[1] / "app" / "Home.py")
 PAGES = ["1_Overview.py", "2_Pressure_Lab.py", "3_Rankings.py", "4_Player_Profile.py", "5_Compare.py", "6_Reliability.py",
          "7_Weights_Lab.py", "8_My_Decisions.py", "9_Data_Quality.py", "10_Submission_Checklist.py",
-         "11_Methodology.py"]
+         "11_Methodology.py", "13_RR_Targets.py"]
 
 
 @pytest.fixture(scope="module")
@@ -67,8 +67,12 @@ def test_overview_boards_and_toggle(monkeypatch, app_data):
 
 @needs_data
 def test_analyst_card_requires_reason_then_updates_final(monkeypatch, app_data):
-    at = _at(monkeypatch)
+    monkeypatch.setenv("APP_PASSWORD", "pw")
+    at = AppTest.from_file(HOME, default_timeout=240)
+    at.session_state["authed"] = True
     at.session_state["selected_role"] = "batter"
+    at.session_state["selected_player"] = app_data.js("final_lists.json")["batters_final"][0]["player_id"]
+    at.run()
     at.switch_page("views/4_Player_Profile.py").run()
     at.text_area(key="pp_reason").set_value("short")
     at.get("form_submit_button")[0].click()

@@ -45,8 +45,10 @@ def apply(rated: dict[str, pd.DataFrame], cfg: Any, overrides: list[dict] | None
     out: dict[str, Any] = {"refused": []}
     for role in ("batter", "bowler"):
         r = rated[role]
-        e = r[r["eligible"]].sort_values("rank")
+        use_target = bool(cfg.get("rr_target.use_for_final", False)) and "target_rank" in r and r["target_rank"].notna().any()
+        e = r[r["target_rank"].notna()].sort_values("target_rank") if use_target else r[r["eligible"]].sort_values("rank")
         order = e["player_id"].astype(int).tolist()
+        pure = r[r["eligible"]].sort_values("rank")["player_id"].astype(int).tolist()[:top_n]
         model = order[:top_n]
         mine = [o for o in ov if o.get("role") == role]
         ok = []
@@ -87,10 +89,13 @@ def apply(rated: dict[str, pd.DataFrame], cfg: Any, overrides: list[dict] | None
                 x = names.loc[p]
                 res.append({"rank": i, "player_id": int(p), "name": str(x["name"]), "display": str(x.get("display", x["name"])),
                             "model_rank": int(x["rank"]) if pd.notna(x["rank"]) else None, "prs": float(x["prs"]),
+                            "target_rank": int(x["target_rank"]) if "target_rank" in x and pd.notna(x["target_rank"]) else None,
                             "provenance": prov.get(p, "model") if final_list else "model",
                             "reason": reasons.get(p, "")})
             return res
         out[f"{role}s_model"] = rows(model)
+        out[f"{role}s_pure_pressure"] = rows(pure)
+        out["list_basis"] = "RR auction targets" if use_target else "pure pressure rating"
         out[f"{role}s_final"] = rows(final, True)
         out[f"{role}s_changes"] = [{"player_id": int(p), "name": str(names.loc[p, "name"]),
                                     "change": "dropped" if p in dropped else "moved out",

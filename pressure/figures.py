@@ -327,3 +327,51 @@ def fig_validation(cfg: Any, dq: dict, val: pd.DataFrame) -> Path:
     ax.set_ylabel("Matches won by runs", fontsize=14)
     data = pd.DataFrame({"margin_error_runs": counts.index.astype(int), "matches": counts.values})
     return _save(fig, data, "12_data_validation", cfg)
+
+
+# --- RR auction-target figures -----------------------------------------------------------------------
+def fig_rr_needs(cfg: Any, res: dict) -> Path:
+    fig, ax, _ = _canvas(cfg, "13. Where RR needs help under pressure",
+                         f"RR's rank among the IPL teams per phase, high-pressure balls, seasons from {cfg.get('rr_target.need_seasons_from')}"
+                         " (10 = worst)")
+    rows = []
+    for side in ("batting", "bowling"):
+        for r in res["rank_rows"][side]:
+            if r["phase"] != "ALL":
+                rows.append({"side": side, "phase": r["phase"], "rr_rank": r["rr_rank_of_teams"], "teams": r["teams"],
+                             "need_weight": res["needs"][side][r["phase"]], "rr_wpa_per100": r["rr_wpa_per100"],
+                             "league_wpa_per100": r["league_avg_wpa_per100"]})
+    d = pd.DataFrame(rows)
+    x = np.arange(3)
+    for j, (side, c) in enumerate((("batting", PINK), ("bowling", BLUE))):
+        v = d[d["side"] == side].set_index("phase").reindex(["PP", "MID", "DEATH"])
+        bars = ax.bar(x + (j - 0.5) * 0.38, v["rr_rank"], width=0.36, color=c, label=f"RR {side}")
+        ax.bar_label(bars, labels=[f"{int(a)}/{int(b)}" for a, b in zip(v["rr_rank"], v["teams"])], fontsize=13, padding=3)
+    ax.set_xticks(x, ["Powerplay", "Middle overs", "Death overs"], fontsize=14)
+    ax.set_ylim(0, 11.5)
+    ax.set_ylabel("RR rank among IPL teams (higher bar = bigger need)", fontsize=13)
+    ax.legend(fontsize=13, frameon=False, loc="upper left")
+    return _save(fig, d, "13_rr_needs", cfg)
+
+
+def fig_rr_targets(cfg: Any, res: dict) -> Path:
+    fig, ax, _ = _canvas(cfg, "14. RR auction targets: pressure reliability vs RR fit",
+                         f"Funnel pool only · target score = {1 - res['fit_weight']:.0%} pressure rating + {res['fit_weight']:.0%} RR fit")
+    ax.axis("off")
+    box = ax.get_position()
+    rows = []
+    for i, (role, c) in enumerate((("batter", PINK), ("bowler", BLUE))):
+        t = pd.DataFrame(res[role]["table"])
+        sub = fig.add_axes([box.x0 + i * box.width / 2 + 0.02, box.y0, box.width / 2 - 0.04, box.height * 0.92])
+        top = t[t["target_rank"] <= 10]
+        sub.scatter(t["prs_pct_pool"], t["fit"], s=30, color=SLATE, alpha=0.6)
+        sub.scatter(top["prs_pct_pool"], top["fit"], s=80, color=c)
+        for _, r in top.iterrows():
+            sub.annotate(f"{int(r['target_rank'])}. {r['name']}", (r["prs_pct_pool"], r["fit"]), xytext=(4, 3),
+                         textcoords="offset points", fontsize=9)
+        sub.set_title(f"{role}s (pool {len(t)})", fontsize=14)
+        sub.set_xlabel("Pressure rating (percentile in pool)", fontsize=11)
+        sub.set_ylabel("RR fit (percentile in pool)", fontsize=11)
+        sub.set_xlim(0, 105), sub.set_ylim(0, 105)
+        rows += top[["target_rank", "name", "prs_pct_pool", "fit", "target_score"]].assign(role=role).round(1).to_dict("records")
+    return _save(fig, pd.DataFrame(rows), "14_rr_targets", cfg)

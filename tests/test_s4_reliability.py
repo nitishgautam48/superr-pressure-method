@@ -91,3 +91,41 @@ def test_export_guard_blocks_row_level(s4, cfg):
     with pytest.raises(F.ExportGuardError):
         F.export_guard(cfg)
     p.unlink()
+
+
+@needs_data
+def test_rr_targets_funnel_alignment_and_final(s4, cfg):
+    import json
+
+    from pressure import analyst, rr_target
+
+    res = rr_target.build(cfg)
+    rr_target.apply_to_rated(cfg, res)
+    finals = analyst.refresh_final(cfg)
+    mp = s4.tables["raw"]["competition_team_player_mapping"]
+    for role, side in (("batter", "batting"), ("bowler", "bowling")):
+        steps = res[role]["steps"]
+        left = [s["remaining"] for s in steps]
+        assert left == sorted(left, reverse=True)                        # funnel only ever removes players
+        t = pd.DataFrame(res[role]["table"])
+        assert (t["aligned_phases"].str.len() > 0).all()               # every target helps a phase RR needs
+        assert t["fit"].between(0, 100).all() and t["target_score"].between(0, 100).all()
+        assert not t["auction_status"].str.startswith("in RR").any()   # current RR squad excluded
+        fl = finals[f"{role}s_final"]
+        assert finals["list_basis"] == "RR auction targets"
+        assert [x["player_id"] for x in fl] == t.sort_values("target_rank")["player_id"].head(10).tolist()
+        assert all(x["name"] in set(mp["player_name"]) for x in fl) and len({x["player_id"] for x in fl}) == 10
+    assert set(res["needs"]["batting"]) == {"PP", "MID", "DEATH"}
+
+
+def test_availability_file_requires_reasons(cfg, tmp_path):
+    from pressure import rr_target
+
+    p = cfg.path("overrides").parent / "auction_pool.yaml"
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text("exclude:\n  - {player_id: 1, reason: short}\n  - {player_id: 2, reason: Retained by his franchise for 2027}\n")
+    try:
+        excl, incl, errors = rr_target.load_availability(cfg)
+        assert excl == {2: "Retained by his franchise for 2027"} and len(errors) == 1
+    finally:
+        p.unlink()

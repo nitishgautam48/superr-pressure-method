@@ -23,7 +23,7 @@ st.set_page_config(page_title="RR Pressure Index", page_icon="✦", layout="wide
 MODE = state.theme_mode()
 st.html(theme.css(MODE))
 
-PAGE_FILES = [("1_Overview.py", "Overview"), ("2_Pressure_Lab.py", "Pressure lab"), ("3_Rankings.py", "Rankings"),
+PAGE_FILES = [("1_Overview.py", "Overview"), ("13_RR_Targets.py", "RR targets"), ("2_Pressure_Lab.py", "Pressure lab"), ("3_Rankings.py", "Rankings"),
               ("4_Player_Profile.py", "Player profile"), ("5_Compare.py", "Compare"), ("6_Reliability.py", "Reliability"), ("11_Methodology.py", "Methodology"),
               ("7_Weights_Lab.py", "Weights lab"), ("8_My_Decisions.py", "My decisions"),
               ("9_Data_Quality.py", "Data quality"), ("10_Submission_Checklist.py", "Submission checklist"),

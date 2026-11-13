@@ -20,15 +20,16 @@ C.kpi_row([C.kpi_tile_html("Matches", f"{rc.get('matches_with_balls', 0):,}"),
            C.kpi_tile_html("Eligible bowlers", f"{int(bowl['eligible'].sum())}"),
            C.kpi_tile_html("WP model Brier", f"{rep.get('summary', {}).get('brier_weighted', 0):.3f}",
                            help="Lower is better; no-skill = 0.25")])
-view = st.segmented_control("List", ["Model", "Final"], default="Final", key="ov_view")
-key = "final" if view == "Final" else "model"
+view = st.segmented_control("List", ["Final", "Model (RR targets)", "Pure pressure"], default="Final", key="ov_view")
+key = {"Final": "final", "Model (RR targets)": "model", "Pure pressure": "pure_pressure"}.get(view, "final")
+st.caption(f"Submission list basis: {fl.get('list_basis', 'pure pressure rating')}.")
 changes = sum(len(fl.get(f"{r}s_changes", [])) for r in ("batter", "bowler"))
 st.caption("Final = model plus your logged decisions (Player profile → Analyst decision). "
            f"{changes} model pick(s) changed so far.")
 with C.pair_grid("ov_boards"):
     with st.container():
-        C._show(boards.board_html("Top 10 batters under pressure", fl.get(f"batters_{key}", []), bat, key == "final"))
+        C._show(boards.board_html("Top 10 batters under pressure", fl.get(f"batters_{key}", fl.get("batters_model", [])), bat, key == "final"))
     with st.container():
-        C._show(boards.board_html("Top 10 bowlers under pressure", fl.get(f"bowlers_{key}", []), bowl, key == "final"))
+        C._show(boards.board_html("Top 10 bowlers under pressure", fl.get(f"bowlers_{key}", fl.get("bowlers_model", [])), bowl, key == "final"))
 st.caption("Labels: ★ Robust = top 10 in ≥ 80% of 1,000 match resamples and of sensitivity variants · ◆ Likely ≥ 50% · "
            "○ Sensitive < 50%. Rank 80% = bootstrap interval.")

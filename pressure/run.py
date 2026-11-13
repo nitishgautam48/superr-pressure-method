@@ -19,6 +19,7 @@ STEPS: list[tuple[str, str]] = [
     ("pressure", "pressure.steps_pressure"),
     ("rating", "pressure.steps_rating"),
     ("reliability", "pressure.steps_reliability"),
+    ("rr_target", "pressure.steps_target"),
 ]
 
 
